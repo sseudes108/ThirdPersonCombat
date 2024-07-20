@@ -7,10 +7,15 @@ public class PlayerFreeLookState : PlayerBaseState{
 
     public override void Enter(){
         StateMachine.InputReader.TargetEvent += OnTarget;
-        StateMachine.Animator.Play(FreeLookBlendTree);
+        StateMachine.Animator.CrossFadeInFixedTime(FreeLookBlendTree, 0.05f);
     }
 
-    public override void Tick(float deltaTime){        
+    public override void Tick(float deltaTime){ 
+        if(StateMachine.InputReader.IsAttacking){
+            StateMachine.SwitchState(StateMachine.PlayerStates.Attacking);
+            return;
+        }
+
         Vector3 movement = CalculateMovement();
         Move(movement * StateMachine.FreelookMovementSpeed, deltaTime);
 
@@ -22,10 +27,10 @@ public class PlayerFreeLookState : PlayerBaseState{
         StateMachine.Animator.SetFloat(FreeLookSpeed, 1, 0.1f, deltaTime);
         FaceMovementDirection(movement, deltaTime);
     }
+
     public override void Exit(){
         StateMachine.InputReader.TargetEvent -= OnTarget;
     }
-
 
     private Vector3 CalculateMovement(){
         var forward = StateMachine.MainCameraPosition.forward;

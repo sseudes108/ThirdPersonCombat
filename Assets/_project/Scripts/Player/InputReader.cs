@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 
 public class InputReader : MonoBehaviour, InputSystem_Actions.IPlayerActions{
     public Vector2 MovementValue {get; private set;}
+    public bool IsAttacking {get; private set;}
     public event Action TargetEvent;
     public event Action CancelEvent;
 
@@ -20,7 +21,13 @@ public class InputReader : MonoBehaviour, InputSystem_Actions.IPlayerActions{
         InputActions.Player.Disable();
     }
 
-    public void OnAttack(InputAction.CallbackContext context){}
+    public void OnAttack(InputAction.CallbackContext context){
+        if(context.performed){
+            IsAttacking = true;
+            return;
+        }
+        IsAttacking = false;
+    }
 
     public void OnCancel(InputAction.CallbackContext context){
         if(!context.performed){return;}

@@ -6,9 +6,11 @@ public class Targeter : MonoBehaviour {
     private List<Target> _targets = new ();
     public Target CurrentTarget {get; private set;}
     private CinemachineTargetGroup _cinemachineTargetGroup;
+    private Camera _mainCamera;
     
     private void Awake() {
         _cinemachineTargetGroup = transform.parent.parent.Find("StateDrivenCamera").GetComponentInChildren<CinemachineTargetGroup>();
+        _mainCamera = Camera.main;
     }
 
     private void OnTriggerEnter(Collider other) {
@@ -25,7 +27,27 @@ public class Targeter : MonoBehaviour {
 
     public bool SelectTarget(){
         if(_targets.Count == 0){return false;}
-        CurrentTarget = _targets[0];
+
+        Target closestTarget = null;
+        float closestTargetDistance = Mathf.Infinity;
+
+        foreach(var target in _targets){
+            Vector2 viewPos = _mainCamera.WorldToViewportPoint(target.transform.position);
+            
+            if(viewPos.x < 0 || viewPos.x > 1 || viewPos.y < 0 || viewPos.x > 1 ){
+                continue;
+            }
+            
+            Vector2 toCenter = viewPos - new Vector2(0.5f, 0.5f);
+            if(toCenter.sqrMagnitude < closestTargetDistance){
+                closestTarget = target;
+                closestTargetDistance = toCenter.sqrMagnitude;
+            }
+        }
+        
+        if(closestTarget == null){return false;}
+
+        CurrentTarget = closestTarget;
         _cinemachineTargetGroup.AddMember(CurrentTarget.transform, 1f, 2f);
         return true;
     }

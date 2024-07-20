@@ -10,10 +10,15 @@ public class PlayerTargetingState : PlayerBaseState{
 
     public override void Enter(){
         StateMachine.InputReader.CancelEvent += OnCancel;
-        StateMachine.Animator.Play(TargetingBlendTree);
+        StateMachine.Animator.CrossFadeInFixedTime(TargetingBlendTree, 0.05f);
     }
 
     public override void Tick(float deltaTime){
+        if(StateMachine.InputReader.IsAttacking){
+            StateMachine.SwitchState(StateMachine.PlayerStates.Attacking);
+            return;
+        }
+
         if(StateMachine.Targeter.CurrentTarget == null){
             StateMachine.SwitchState(StateMachine.PlayerStates.FreeLook);
             return;
