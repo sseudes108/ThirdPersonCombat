@@ -1,31 +1,32 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CharacterController), typeof(InputReader), typeof(ForceReceiver))]
+[RequireComponent(typeof(InputReader))]
 public class PlayerStateMachine : StateMachine {
     [field:SerializeField] public PlayerStatesSO PlayerStates { get; private set; }
 
     public InputReader InputReader { get; private set; }
-    public CharacterController Controller { get; private set; }
-    public Animator Animator { get; private set; }
     public Targeter Targeter { get; private set; }
     public Transform MainCameraPosition { get; private set; }
-    public ForceReceiver ForceReceiver { get; private set; }
-    [field:SerializeField] public WeaponDamage WeaponDamage { get; private set; }
-
-    [field:SerializeField] public List<AttackSO> Attacks { get; private set; }
  
     [field:SerializeField] public float FreelookMovementSpeed { get; private set; }
     [field:SerializeField] public float TargetingMovementSpeed { get; private set; }
     [field:SerializeField] public float RotationSmoothValue { get; private set; }
 
-    private void Awake() {
-        SetComponents();
-        SetStates();
-    }
+    [field:SerializeField] public float DodgeDuration { get; private set; }
+    [field:SerializeField] public float DodgeLenght { get; private set; }
+
+    [field:SerializeField] public float JumpForce { get; private set; }
 
     private void Start() {
         SwitchState(PlayerStates.FreeLook);
+    }
+
+    public override void Update() {
+        base.Update();
+        if(InputReader.IsBlocking){
+             
+            SwitchState(PlayerStates.Blocking);
+        }
     }
     
     public override void SwitchState(State newState){
@@ -33,18 +34,24 @@ public class PlayerStateMachine : StateMachine {
         Tester.Instance.UpdateStateLabel(newState.ToString());
     }
 
-    private void SetStates(){
+    public override void SetStates(){
         PlayerStates.SetStateMachine(this);
         PlayerStates.CreateStates();
     }
 
-    private void SetComponents(){
+    public override void SetComponents(){
+        base.SetComponents();
         InputReader = GetComponent<InputReader>();
-        Controller = GetComponent<CharacterController>();
-        Animator = GetComponentInChildren<Animator>();
         Targeter = GetComponentInChildren<Targeter>();
-        ForceReceiver = GetComponent<ForceReceiver>();
         MainCameraPosition = Camera.main.transform;
     }
 
+    public override void OnDamageTaken(){
+        SwitchState(PlayerStates.Impact);
+    }
+
+    public override void OnDie(){
+        InputReader.ResetActions();
+        SwitchState(PlayerStates.Dead);
+    }
 }

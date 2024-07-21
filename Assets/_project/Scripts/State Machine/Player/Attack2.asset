@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <AnimationName>k__BackingField: StandingAttack2
   <TransitionDuration>k__BackingField: 0.1
-  <ComboStateIndex>k__BackingField: 1
   <ComboAttackTime>k__BackingField: 0.5
   <Force>k__BackingField: 15
   <ForceTime>k__BackingField: 0.35
   <AttackDamage>k__BackingField: 15
+  <KnockbackForce>k__BackingField: 5

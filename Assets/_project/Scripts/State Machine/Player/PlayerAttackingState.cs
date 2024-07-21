@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class PlayerAttackingState : PlayerBaseState{
     public PlayerAttackingState(PlayerStateMachine stateMachine) : base(stateMachine){}
     public AttackSO Attack { get; private set; }
@@ -6,16 +8,16 @@ public class PlayerAttackingState : PlayerBaseState{
     public override void Enter(){
         _alreadyAppliedForce = false;
         Attack = GetCurrentAttack();
-        StateMachine.WeaponDamage.SetDamage(Attack.AttackDamage);
+        StateMachine.WeaponDamage.SetDamage(Attack.AttackDamage, Attack.KnockbackForce);
         StateMachine.Animator.CrossFadeInFixedTime(Attack.AnimationName, Attack.TransitionDuration);
     }
 
     public override void Tick(float deltaTime){
-        Move(deltaTime);
+        Move(StateMachine, deltaTime);
         FaceTarget(deltaTime);
-        float normalizedTime = GetNormalizedTime();
+        float normalizedTime = GetNormalizedTime(StateMachine.Animator);
 
-        if(normalizedTime < 1f){
+        if(normalizedTime <= 1f){
             if(normalizedTime > Attack.ForceTime){
                 TryApplyForce();
             }
@@ -34,16 +36,14 @@ public class PlayerAttackingState : PlayerBaseState{
     }
 
 
-    public override void Exit(){
-
-    }
+    public override void Exit(){}
 
     public override string ToString(){
         return "Attack";
     }
 
     private void TryComboAttack(float normalizedTime){
-        if(Attack.ComboStateIndex == StateMachine.Attacks.Count -1){return;}
+        if(_attackIndex == StateMachine.Attacks.Count -1){return;}
         if(normalizedTime < Attack.ComboAttackTime){return;}
 
         ChainAttack();
@@ -55,18 +55,5 @@ public class PlayerAttackingState : PlayerBaseState{
 
         StateMachine.ForceReceiver.AddForce(StateMachine.transform.forward * Attack.Force);
         _alreadyAppliedForce = true;
-    }
-
-    private float GetNormalizedTime(){
-        var currentInfo = StateMachine.Animator.GetCurrentAnimatorStateInfo(0);
-        var nextInfo = StateMachine.Animator.GetNextAnimatorStateInfo(0);
-
-        if(StateMachine.Animator.IsInTransition(0) && nextInfo.IsTag("Attack")){
-            return nextInfo.normalizedTime;
-        }else if(!StateMachine.Animator.IsInTransition(0) && currentInfo.IsTag("Attack")){
-            return currentInfo.normalizedTime;
-        }else{
-            return 0;
-        }
     }
 }

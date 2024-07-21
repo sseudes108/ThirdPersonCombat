@@ -1,11 +1,12 @@
 using UnityEngine;
 
 public abstract class PlayerBaseState : State {
+    // protected Vector3 _dodgeDirection;
     public PlayerBaseState(PlayerStateMachine stateMachine){
         StateMachine = stateMachine;
     }
 
-    private int _attackIndex = 0;
+    protected int _attackIndex = 0;
     public PlayerStateMachine StateMachine { get; private set; }
 
     public abstract override string ToString();
@@ -25,14 +26,6 @@ public abstract class PlayerBaseState : State {
         _attackIndex = 0;
     }
 
-    protected void Move(Vector3 motion, float deltaTime){
-        StateMachine.Controller.Move((motion +  StateMachine.ForceReceiver.Movement) * deltaTime);
-    }
-
-    protected void Move(float deltaTime){
-        Move(Vector3.zero, deltaTime);
-    }
-
     protected void FaceTarget(float deltaTime){
         if(StateMachine.Targeter.CurrentTarget == null){return;}
         var lookPos = StateMachine.Targeter.CurrentTarget.transform.position - StateMachine.transform.position;
@@ -42,5 +35,13 @@ public abstract class PlayerBaseState : State {
             Quaternion.LookRotation(lookPos),
             deltaTime * StateMachine.RotationSmoothValue
         );
+    }
+
+    protected void ReturnToLocomotion(){
+        if(StateMachine.Targeter.CurrentTarget != null){
+            StateMachine.SwitchState(StateMachine.PlayerStates.Targeting);
+            return;
+        }
+        StateMachine.SwitchState(StateMachine.PlayerStates.FreeLook);
     }
 }

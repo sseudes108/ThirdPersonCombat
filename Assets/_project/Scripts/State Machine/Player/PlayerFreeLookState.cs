@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerFreeLookState : PlayerBaseState{
@@ -7,7 +8,9 @@ public class PlayerFreeLookState : PlayerBaseState{
 
     public override void Enter(){
         StateMachine.InputReader.TargetEvent += OnTarget;
+        StateMachine.InputReader.JumpEvent += OnJump;
         StateMachine.Animator.CrossFadeInFixedTime(FreeLookBlendTree, 0.05f);
+        StateMachine.StartCoroutine(RemoveTargetFromCameraGroup());
     }
 
     public override void Tick(float deltaTime){ 
@@ -17,7 +20,7 @@ public class PlayerFreeLookState : PlayerBaseState{
         }
 
         Vector3 movement = CalculateMovement();
-        Move(movement * StateMachine.FreelookMovementSpeed, deltaTime);
+        Move(StateMachine, movement * StateMachine.FreelookMovementSpeed, deltaTime);
 
         if(StateMachine.InputReader.MovementValue == Vector2.zero){
             StateMachine.Animator.SetFloat(FreeLookSpeed, 0, 0.1f, deltaTime);
@@ -30,6 +33,7 @@ public class PlayerFreeLookState : PlayerBaseState{
 
     public override void Exit(){
         StateMachine.InputReader.TargetEvent -= OnTarget;
+        StateMachine.InputReader.JumpEvent -= OnJump;
     }
 
     private Vector3 CalculateMovement(){
@@ -58,7 +62,16 @@ public class PlayerFreeLookState : PlayerBaseState{
         StateMachine.SwitchState(StateMachine.PlayerStates.Targeting);
     }
 
+    private void OnJump(){
+        StateMachine.SwitchState(StateMachine.PlayerStates.Jumping);
+    }
+
     public override string ToString(){
         return "Free Look";
+    }
+
+    private IEnumerator RemoveTargetFromCameraGroup(){
+        yield return new WaitForSeconds(1f);
+        StateMachine.Targeter.RemoveT();
     }
 }

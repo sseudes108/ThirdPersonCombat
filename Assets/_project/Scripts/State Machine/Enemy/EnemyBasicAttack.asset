@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 294046e9cc707f74a84ab633a975f101, type: 3}
-  m_Name: Attack3
+  m_Name: EnemyBasicAttack
   m_EditorClassIdentifier: 
-  <AnimationName>k__BackingField: StandingAttack3
-  <TransitionDuration>k__BackingField: 0.2
+  <AnimationName>k__BackingField: Attack
+  <TransitionDuration>k__BackingField: 0.1
   <ComboAttackTime>k__BackingField: 0
-  <Force>k__BackingField: 20
-  <ForceTime>k__BackingField: 0.35
-  <AttackDamage>k__BackingField: 20
-  <KnockbackForce>k__BackingField: 7
+  <Force>k__BackingField: 0
+  <ForceTime>k__BackingField: 0
+  <AttackDamage>k__BackingField: 10
+  <KnockbackForce>k__BackingField: 3

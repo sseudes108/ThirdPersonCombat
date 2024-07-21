@@ -5,11 +5,13 @@ using UnityEngine;
 public class Targeter : MonoBehaviour {
     private List<Target> _targets = new ();
     public Target CurrentTarget {get; private set;}
-    private CinemachineTargetGroup _cinemachineTargetGroup;
+    public CinemachineTargetGroup CinemachineTargetGroup;
     private Camera _mainCamera;
+
+    Target _targetT;
     
     private void Awake() {
-        _cinemachineTargetGroup = transform.parent.parent.Find("StateDrivenCamera").GetComponentInChildren<CinemachineTargetGroup>();
+        CinemachineTargetGroup = transform.parent.parent.Find("StateDrivenCamera").GetComponentInChildren<CinemachineTargetGroup>();
         _mainCamera = Camera.main;
     }
 
@@ -23,6 +25,7 @@ public class Targeter : MonoBehaviour {
     private void OnTriggerExit(Collider other) {
         if(!other.TryGetComponent(out Target target)){return;}
         RemoveTarget(target);
+        _targetT = target;
     }
 
     public bool SelectTarget(){
@@ -33,8 +36,9 @@ public class Targeter : MonoBehaviour {
 
         foreach(var target in _targets){
             Vector2 viewPos = _mainCamera.WorldToViewportPoint(target.transform.position);
-            
-            if(viewPos.x < 0 || viewPos.x > 1 || viewPos.y < 0 || viewPos.x > 1 ){
+
+            if(!target.transform.Find("Model").GetComponentInChildren<Renderer>().isVisible){
+                Debug.Log($"isVisible: {target.transform.Find("Model").GetComponentInChildren<Renderer>().isVisible}");
                 continue;
             }
             
@@ -48,13 +52,14 @@ public class Targeter : MonoBehaviour {
         if(closestTarget == null){return false;}
 
         CurrentTarget = closestTarget;
-        _cinemachineTargetGroup.AddMember(CurrentTarget.transform, 1f, 2f);
+        CinemachineTargetGroup.AddMember(CurrentTarget.transform, 1f, 2f);
         return true;
     }
 
     public void Cancel(){
+        RemoveT();
         if(CurrentTarget == null){return;}
-        _cinemachineTargetGroup.RemoveMember(CurrentTarget.transform);
+        CinemachineTargetGroup.RemoveMember(CurrentTarget.transform);
         CurrentTarget = null;
     }
 
@@ -65,5 +70,11 @@ public class Targeter : MonoBehaviour {
 
         target.OnDestroyed -= RemoveTarget;
         _targets.Remove(target);
+    }
+
+    public void RemoveT(){
+        if(_targetT == null) { return; }
+        CinemachineTargetGroup.RemoveMember(_targetT.transform);
+        _targetT = null;
     }
 }
